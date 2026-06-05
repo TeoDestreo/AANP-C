@@ -651,6 +651,31 @@ h1 {
   padding: 13px 14px;
 }
 
+.choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.choice input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.field.full-width {
+  grid-column: 1 / -1;
+}
+
 .estimate-panel {
   border-top: 8px solid var(--red);
 }
@@ -1256,79 +1281,112 @@ footer a {
 <section class="form-wrap" id="calculator">
   <h2>Pricing Calculator</h2>
   <p>
-    Use this calculator to get a starting monthly estimate for nonprofit accounting
-    support. The final quote depends on the condition of the books, reporting deadlines,
-    grant complexity, and the exact scope you want handled.
+    Use this calculator to estimate monthly accounting support using gross receipts,
+    transaction volume, accounting method, bank and credit card accounts, and optional
+    add-ons. Organizations over $500,000 in gross receipts should request a custom quote.
   </p>
 
   <div class="calculator" aria-label="Nonprofit accounting pricing calculator">
     <div class="calculator-panel">
       <div class="calculator-grid">
         <div class="field">
-          <label for="serviceType">Service Type</label>
-          <select id="serviceType">
-            <option value="monthly">Monthly accounting</option>
-            <option value="cleanup">Cleanup project</option>
-            <option value="controller">Controller support</option>
+          <label for="grossReceipts">Gross Receipts</label>
+          <select id="grossReceipts">
+            <option value="395">Less than $75,000</option>
+            <option value="495">$75,000 - $100,000</option>
+            <option value="595">$100,000 - $150,000</option>
+            <option value="695">$150,000 - $200,000</option>
+            <option value="795">$200,000 - $300,000</option>
+            <option value="895">$300,000 - $400,000</option>
+            <option value="995">$400,000 - $500,000</option>
+            <option value="custom">Over $500,000</option>
           </select>
         </div>
 
         <div class="field">
           <label for="transactionVolume">Monthly Transactions</label>
           <select id="transactionVolume">
-            <option value="low">Under 100</option>
-            <option value="mid">100 to 300</option>
-            <option value="high">300+</option>
+            <option value="0">Less than 50</option>
+            <option value="100">50 - 100</option>
+            <option value="200">100 - 200</option>
+            <option value="350">200 - 300</option>
+            <option value="500">300 - 400</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="fundCount">Funds or Programs</label>
-          <input id="fundCount" type="number" min="1" max="30" value="3">
+          <label>Accounting Style</label>
+          <div class="choice-group">
+            <label class="choice"><input type="radio" name="accountingStyle" value="0" checked> Cash</label>
+            <label class="choice"><input type="radio" name="accountingStyle" value="125"> Accrual</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="accountCount">Bank/CC Accounts</label>
+          <select id="accountCount">
+            <option value="5">1 - 5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10+</option>
+          </select>
         </div>
 
         <div class="field">
           <label for="grantCount">Active Grants</label>
-          <input id="grantCount" type="number" min="0" max="30" value="1">
-        </div>
-
-        <div class="field">
-          <label for="reportingLevel">Reporting Need</label>
-          <select id="reportingLevel">
-            <option value="standard">Standard monthly reports</option>
-            <option value="board">Board package</option>
-            <option value="custom">Custom grant or fund reports</option>
+          <select id="grantCount">
+            <option value="0">None</option>
+            <option value="1">1 grant</option>
+            <option value="2">2 grants</option>
+            <option value="3">3 grants</option>
+            <option value="4">4 grants</option>
+            <option value="5">5+ grants</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="booksCondition">Books Condition</label>
-          <select id="booksCondition">
-            <option value="clean">Mostly current</option>
-            <option value="needsReview">Needs review</option>
-            <option value="cleanup">Needs cleanup</option>
+          <label for="taxFiling">Annual Tax Filing</label>
+          <select id="taxFiling">
+            <option value="0">Not included</option>
+            <option value="300">990-N (&lt;$50K revenue)</option>
+            <option value="850">990-EZ ($50K - $200K)</option>
+            <option value="1700">990 Full (&gt;$200K)</option>
           </select>
+        </div>
+
+        <div class="field full-width">
+          <label>Add-Ons</label>
+          <div class="choice-group">
+            <label class="choice"><input id="auditSupport" type="checkbox" value="150"> Audit Support</label>
+            <label class="choice"><input id="donorReporting" type="checkbox" value="45"> Donor/Member Reporting</label>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="estimate-panel">
-      <div class="estimate-label">Starting Estimate</div>
-      <div class="estimate-total" id="estimateTotal">$1,400/mo</div>
+      <div class="estimate-label">Estimated Monthly Rate</div>
+      <div class="estimate-total" id="estimateTotal">$395/mo</div>
       <div class="estimate-note" id="estimateNote">
-        Best for recurring monthly accounting support with standard nonprofit reporting.
+        Base monthly accounting support for organizations under $75,000 in gross receipts.
       </div>
       <div class="estimate-list" aria-label="Estimate details">
         <div class="estimate-row">
-          <span>Estimated range</span>
-          <strong id="estimateRange">$1,190 - $1,610</strong>
+          <span>Monthly add-ons</span>
+          <strong id="monthlyAddOns">$0</strong>
+        </div>
+        <div class="estimate-row">
+          <span>Annual tax filing</span>
+          <strong id="annualTax">$0/year</strong>
         </div>
         <div class="estimate-row">
           <span>Suggested next step</span>
-          <strong id="estimateStep">Monthly service quote</strong>
+          <strong id="estimateStep">Request quote</strong>
         </div>
       </div>
-      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLScTBl7rkk_Ln1uZiYq78tCbGov1Ogr68xs1M7bB1qzYRUmnNw/viewform?usp=header" data-analytics-event="quote_form_click">Request a Quote</a>
+      <a class="btn" id="quoteButton" href="https://docs.google.com/forms/d/e/1FAIpQLScTBl7rkk_Ln1uZiYq78tCbGov1Ogr68xs1M7bB1qzYRUmnNw/viewform?usp=header" data-analytics-event="quote_form_click">Request a Quote</a>
     </div>
   </div>
 </section>
@@ -1357,12 +1415,13 @@ footer a {
 
 <script>
 var calculatorFields = [
-  'serviceType',
+  'grossReceipts',
   'transactionVolume',
-  'fundCount',
+  'accountCount',
   'grantCount',
-  'reportingLevel',
-  'booksCondition'
+  'taxFiling',
+  'auditSupport',
+  'donorReporting'
 ];
 
 function currency(value) {
@@ -1370,70 +1429,52 @@ function currency(value) {
 }
 
 function calculateEstimate() {
-  var serviceType = document.getElementById('serviceType');
+  var grossReceipts = document.getElementById('grossReceipts');
   var transactionVolume = document.getElementById('transactionVolume');
-  var fundCount = document.getElementById('fundCount');
+  var accountCount = document.getElementById('accountCount');
   var grantCount = document.getElementById('grantCount');
-  var reportingLevel = document.getElementById('reportingLevel');
-  var booksCondition = document.getElementById('booksCondition');
+  var taxFiling = document.getElementById('taxFiling');
+  var auditSupport = document.getElementById('auditSupport');
+  var donorReporting = document.getElementById('donorReporting');
+  var accountingStyle = document.querySelector('input[name="accountingStyle"]:checked');
+  var quoteButton = document.getElementById('quoteButton');
 
-  if (!serviceType || !transactionVolume || !fundCount || !grantCount || !reportingLevel || !booksCondition) {
+  if (!grossReceipts || !transactionVolume || !accountCount || !grantCount || !taxFiling || !auditSupport || !donorReporting || !accountingStyle) {
     return;
   }
 
-  var serviceBase = {
-    monthly: 1250,
-    cleanup: 2200,
-    controller: 2750
-  };
+  if (grossReceipts.value === 'custom') {
+    document.getElementById('estimateTotal').textContent = 'Custom';
+    document.getElementById('monthlyAddOns').textContent = 'Custom';
+    document.getElementById('annualTax').textContent = currency(Number(taxFiling.value)) + '/year';
+    document.getElementById('estimateStep').textContent = 'Custom quote required';
+    document.getElementById('estimateNote').textContent = 'Organizations over $500,000 in gross receipts should request a custom quote so the scope can be reviewed directly.';
+    if (quoteButton) {
+      quoteButton.textContent = 'Custom Quote';
+    }
+    return;
+  }
 
-  var volumeAdd = {
-    low: 0,
-    mid: 450,
-    high: 950
-  };
-
-  var reportingAdd = {
-    standard: 0,
-    board: 350,
-    custom: 750
-  };
-
-  var conditionAdd = {
-    clean: 0,
-    needsReview: 400,
-    cleanup: 900
-  };
-
-  var funds = Math.max(1, Math.min(30, Number(fundCount.value) || 1));
+  var baseRate = Number(grossReceipts.value);
+  var transactions = Number(transactionVolume.value);
+  var style = Number(accountingStyle.value);
+  var accounts = Math.max(5, Math.min(10, Number(accountCount.value) || 5));
   var grants = Math.max(0, Math.min(30, Number(grantCount.value) || 0));
-  var estimate = serviceBase[serviceType.value] +
-    volumeAdd[transactionVolume.value] +
-    reportingAdd[reportingLevel.value] +
-    conditionAdd[booksCondition.value] +
-    Math.max(0, funds - 3) * 85 +
-    grants * 150;
+  var extraAccounts = Math.max(0, accounts - 5) * 25;
+  var audit = auditSupport.checked ? Number(auditSupport.value) : 0;
+  var donor = donorReporting.checked ? Number(donorReporting.value) : 0;
+  var grantTracking = grants * 65;
+  var addOns = transactions + style + extraAccounts + audit + donor + grantTracking;
+  var estimate = baseRate + addOns;
 
-  var suffix = serviceType.value === 'cleanup' ? ' project' : '/mo';
-  var low = Math.max(750, estimate * .85);
-  var high = estimate * 1.15;
-  var note = 'Best for recurring monthly accounting support with standard nonprofit reporting.';
-  var step = 'Monthly service quote';
-
-  if (serviceType.value === 'cleanup') {
-    note = 'Best for catching up, cleaning QuickBooks, and rebuilding reports before monthly support begins.';
-    step = 'Cleanup scope review';
+  document.getElementById('estimateTotal').textContent = currency(estimate) + '/mo';
+  document.getElementById('monthlyAddOns').textContent = currency(addOns);
+  document.getElementById('annualTax').textContent = currency(Number(taxFiling.value)) + '/year';
+  document.getElementById('estimateStep').textContent = 'Request quote';
+  document.getElementById('estimateNote').textContent = 'Estimated monthly rate based on the selected gross receipts tier, transactions, accounting style, account count, grants, and add-ons.';
+  if (quoteButton) {
+    quoteButton.textContent = 'Request a Quote';
   }
-
-  if (serviceType.value === 'controller') {
-    note = 'Best for organizations that need recurring review, board packages, budgeting help, and finance guidance.';
-    step = 'Controller support quote';
-  }
-
-  document.getElementById('estimateTotal').textContent = currency(estimate) + suffix;
-  document.getElementById('estimateRange').textContent = currency(low) + ' - ' + currency(high);
-  document.getElementById('estimateStep').textContent = step;
-  document.getElementById('estimateNote').textContent = note;
 }
 
 calculatorFields.forEach(function(fieldId) {
@@ -1442,6 +1483,10 @@ calculatorFields.forEach(function(fieldId) {
     field.addEventListener('input', calculateEstimate);
     field.addEventListener('change', calculateEstimate);
   }
+});
+
+document.querySelectorAll('input[name="accountingStyle"]').forEach(function(field) {
+  field.addEventListener('change', calculateEstimate);
 });
 
 calculateEstimate();
