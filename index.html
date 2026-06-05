@@ -607,14 +607,22 @@ h1 {
 
 .calculator {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: 1fr;
   gap: 32px;
   align-items: start;
   margin-top: 34px;
 }
 
+.pricing-paths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 30px;
+}
+
 .calculator-panel,
-.estimate-panel {
+.estimate-panel,
+.custom-quote-panel {
   background: var(--white);
   border: 1px solid var(--line);
   box-shadow: 0 16px 38px rgba(0,0,0,.08);
@@ -721,6 +729,35 @@ h1 {
 
 .estimate-row strong {
   color: var(--text);
+}
+
+.add-on-breakdown {
+  border-top: 1px solid var(--line);
+  margin: 0 0 24px;
+  padding: 18px 0 0;
+  display: grid;
+  gap: 10px;
+}
+
+.add-on-breakdown h3 {
+  color: var(--navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+
+.custom-quote-panel {
+  border-left: 8px solid var(--red);
+  margin-top: 34px;
+}
+
+.custom-quote-panel h3 {
+  color: var(--navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  line-height: 1.1;
+  margin: 0 0 12px;
 }
 
 footer {
@@ -1283,10 +1320,15 @@ footer a {
   <p>
     Use this calculator to estimate monthly accounting support using gross receipts,
     transaction volume, accounting method, bank and credit card accounts, and optional
-    add-ons. Organizations over $500,000 in gross receipts should request a custom quote.
+    add-ons.
   </p>
 
-  <div class="calculator" aria-label="Nonprofit accounting pricing calculator">
+  <div class="pricing-paths" aria-label="Choose quote path">
+    <a class="btn" href="#under-500">&lt;$500k</a>
+    <a class="btn secondary-btn" href="#custom-quote">&gt;$500k</a>
+  </div>
+
+  <div class="calculator" id="under-500" aria-label="Nonprofit accounting pricing calculator">
     <div class="calculator-panel">
       <div class="calculator-grid">
         <div class="field">
@@ -1299,7 +1341,6 @@ footer a {
             <option value="795">$200,000 - $300,000</option>
             <option value="895">$300,000 - $400,000</option>
             <option value="995">$400,000 - $500,000</option>
-            <option value="custom">Over $500,000</option>
           </select>
         </div>
 
@@ -1374,7 +1415,7 @@ footer a {
       </div>
       <div class="estimate-list" aria-label="Estimate details">
         <div class="estimate-row">
-          <span>Monthly add-ons</span>
+          <span>Monthly add-on total</span>
           <strong id="monthlyAddOns">$0</strong>
         </div>
         <div class="estimate-row">
@@ -1386,8 +1427,22 @@ footer a {
           <strong id="estimateStep">Request quote</strong>
         </div>
       </div>
-      <a class="btn" id="quoteButton" href="https://docs.google.com/forms/d/e/1FAIpQLScTBl7rkk_Ln1uZiYq78tCbGov1Ogr68xs1M7bB1qzYRUmnNw/viewform?usp=header" data-analytics-event="quote_form_click">Request a Quote</a>
+      <div class="add-on-breakdown" aria-label="Monthly add-on breakdown">
+        <h3>Monthly Add-Ons</h3>
+        <div id="addOnBreakdown"></div>
+      </div>
+      <a class="btn" id="quoteButton" href="mailto:info@notforprofitcfo.com" data-analytics-event="quote_form_click">Request a Quote</a>
     </div>
+  </div>
+
+  <div class="custom-quote-panel" id="custom-quote">
+    <h3>Custom Quote for Organizations Over $500k</h3>
+    <p>
+      Organizations with more than $500,000 in gross receipts usually need a more tailored
+      scope. Use the custom quote button and include your approximate revenue, transaction
+      volume, number of accounts, grants, and reporting needs.
+    </p>
+    <a class="btn" id="customQuoteButton" href="mailto:info@notforprofitcfo.com?subject=Custom%20Nonprofit%20Accounting%20Quote%20Request&body=I%20would%20like%20a%20custom%20quote%20for%20an%20organization%20with%20more%20than%20%24500%2C000%20in%20gross%20receipts.%0A%0AApproximate%20gross%20receipts%3A%20%0AMonthly%20transactions%3A%20%0ABank%2FCC%20accounts%3A%20%0AAccounting%20style%3A%20%0AActive%20grants%3A%20%0AAdd-ons%20needed%3A%20%0AAnnual%20tax%20filing%3A%20%0AOther%20notes%3A%20" data-analytics-event="custom_quote_click">Custom Quote</a>
   </div>
 </section>
 
@@ -1428,6 +1483,17 @@ function currency(value) {
   return '$' + Math.round(value).toLocaleString('en-US');
 }
 
+function selectedText(field) {
+  return field.options[field.selectedIndex].text;
+}
+
+function addBreakdownRow(container, label, value) {
+  var row = document.createElement('div');
+  row.className = 'estimate-row';
+  row.innerHTML = '<span>' + label + '</span><strong>' + currency(value) + '</strong>';
+  container.appendChild(row);
+}
+
 function calculateEstimate() {
   var grossReceipts = document.getElementById('grossReceipts');
   var transactionVolume = document.getElementById('transactionVolume');
@@ -1438,20 +1504,9 @@ function calculateEstimate() {
   var donorReporting = document.getElementById('donorReporting');
   var accountingStyle = document.querySelector('input[name="accountingStyle"]:checked');
   var quoteButton = document.getElementById('quoteButton');
+  var addOnBreakdown = document.getElementById('addOnBreakdown');
 
-  if (!grossReceipts || !transactionVolume || !accountCount || !grantCount || !taxFiling || !auditSupport || !donorReporting || !accountingStyle) {
-    return;
-  }
-
-  if (grossReceipts.value === 'custom') {
-    document.getElementById('estimateTotal').textContent = 'Custom';
-    document.getElementById('monthlyAddOns').textContent = 'Custom';
-    document.getElementById('annualTax').textContent = currency(Number(taxFiling.value)) + '/year';
-    document.getElementById('estimateStep').textContent = 'Custom quote required';
-    document.getElementById('estimateNote').textContent = 'Organizations over $500,000 in gross receipts should request a custom quote so the scope can be reviewed directly.';
-    if (quoteButton) {
-      quoteButton.textContent = 'Custom Quote';
-    }
+  if (!grossReceipts || !transactionVolume || !accountCount || !grantCount || !taxFiling || !auditSupport || !donorReporting || !accountingStyle || !addOnBreakdown) {
     return;
   }
 
@@ -1466,14 +1521,75 @@ function calculateEstimate() {
   var grantTracking = grants * 65;
   var addOns = transactions + style + extraAccounts + audit + donor + grantTracking;
   var estimate = baseRate + addOns;
+  var accountingStyleLabel = accountingStyle.parentElement.textContent.trim();
+  var taxFilingAmount = Number(taxFiling.value);
+
+  addOnBreakdown.innerHTML = '';
+
+  if (transactions > 0) {
+    addBreakdownRow(addOnBreakdown, 'Transactions: ' + selectedText(transactionVolume), transactions);
+  }
+
+  if (style > 0) {
+    addBreakdownRow(addOnBreakdown, 'Accounting style: Accrual', style);
+  }
+
+  if (extraAccounts > 0) {
+    addBreakdownRow(addOnBreakdown, 'Bank/CC accounts over 5', extraAccounts);
+  }
+
+  if (audit > 0) {
+    addBreakdownRow(addOnBreakdown, 'Audit support', audit);
+  }
+
+  if (donor > 0) {
+    addBreakdownRow(addOnBreakdown, 'Donor/member reporting', donor);
+  }
+
+  if (grantTracking > 0) {
+    addBreakdownRow(addOnBreakdown, 'Grant tracking: ' + selectedText(grantCount), grantTracking);
+  }
+
+  if (addOns === 0) {
+    var emptyRow = document.createElement('div');
+    emptyRow.className = 'estimate-row';
+    emptyRow.innerHTML = '<span>No monthly add-ons selected</span><strong>$0</strong>';
+    addOnBreakdown.appendChild(emptyRow);
+  }
 
   document.getElementById('estimateTotal').textContent = currency(estimate) + '/mo';
   document.getElementById('monthlyAddOns').textContent = currency(addOns);
-  document.getElementById('annualTax').textContent = currency(Number(taxFiling.value)) + '/year';
+  document.getElementById('annualTax').textContent = currency(taxFilingAmount) + '/year';
   document.getElementById('estimateStep').textContent = 'Request quote';
   document.getElementById('estimateNote').textContent = 'Estimated monthly rate based on the selected gross receipts tier, transactions, accounting style, account count, grants, and add-ons.';
   if (quoteButton) {
     quoteButton.textContent = 'Request a Quote';
+    var body = [
+      'I would like a quote for nonprofit accounting services.',
+      '',
+      'Gross receipts: ' + selectedText(grossReceipts),
+      'Monthly base rate: ' + currency(baseRate) + '/mo',
+      'Monthly transactions: ' + selectedText(transactionVolume) + ' (' + currency(transactions) + '/mo)',
+      'Accounting style: ' + accountingStyleLabel + ' (' + currency(style) + '/mo)',
+      'Bank/CC accounts: ' + selectedText(accountCount) + ' (' + currency(extraAccounts) + '/mo add-on)',
+      'Active grants: ' + selectedText(grantCount) + ' (' + currency(grantTracking) + '/mo)',
+      'Audit support: ' + (auditSupport.checked ? 'Yes ($150/mo)' : 'No'),
+      'Donor/member reporting: ' + (donorReporting.checked ? 'Yes ($45/mo)' : 'No'),
+      'Annual tax filing: ' + selectedText(taxFiling) + ' (' + currency(taxFilingAmount) + '/year)',
+      '',
+      'Estimated monthly add-ons: ' + currency(addOns),
+      'Estimated monthly rate: ' + currency(estimate) + '/mo',
+      'Estimated annual tax filing: ' + currency(taxFilingAmount) + '/year',
+      '',
+      'Organization name:',
+      'Contact name:',
+      'Phone:',
+      'Notes:'
+    ].join('\n');
+
+    quoteButton.href = 'mailto:info@notforprofitcfo.com?subject=' +
+      encodeURIComponent('Nonprofit Accounting Quote Request') +
+      '&body=' + encodeURIComponent(body);
   }
 }
 
