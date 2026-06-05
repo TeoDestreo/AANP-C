@@ -1508,7 +1508,7 @@ footer a {
         <h3>Monthly Add-Ons</h3>
         <div id="addOnBreakdown"></div>
       </div>
-      <a class="btn" id="quoteButton" href="mailto:info@notforprofitcfo.com" data-analytics-event="quote_form_click">Request a Quote</a>
+      <a class="btn" id="quoteButton" href="https://docs.google.com/forms/d/e/1FAIpQLSdAsUYCbtEHYw6juBhwc4FsMiG5EZ_LzLvNMG0MZrKiTvQmHQ/viewform?usp=pp_url&entry.1037187236=Receipts%3ALess%20than%20%2475%2C000%20%7C%20MoTotal%3A%24395" data-analytics-event="quote_form_click">Request a Quote</a>
     </div>
   </div>
 
@@ -1519,7 +1519,7 @@ footer a {
       scope. Use the custom quote button and include your approximate revenue, transaction
       volume, number of accounts, grants, and reporting needs.
     </p>
-    <a class="btn" id="customQuoteButton" href="mailto:info@notforprofitcfo.com?subject=Custom%20Nonprofit%20Accounting%20Quote%20Request&body=I%20would%20like%20a%20custom%20quote%20for%20an%20organization%20with%20more%20than%20%24500%2C000%20in%20gross%20receipts.%0A%0AApproximate%20gross%20receipts%3A%20%0AMonthly%20transactions%3A%20%0ABank%2FCC%20accounts%3A%20%0AAccounting%20style%3A%20%0AActive%20grants%3A%20%0AAdd-ons%20needed%3A%20%0AAnnual%20tax%20filing%3A%20%0AOther%20notes%3A%20" data-analytics-event="custom_quote_click">Custom Quote</a>
+    <a class="btn" id="customQuoteButton" href="https://docs.google.com/forms/d/e/1FAIpQLSdAsUYCbtEHYw6juBhwc4FsMiG5EZ_LzLvNMG0MZrKiTvQmHQ/viewform?usp=pp_url&entry.1037187236=Receipts%3A%24500%2C000%2B%20%7C%20CustomQuote" data-analytics-event="custom_quote_click">Custom Quote</a>
   </div>
 </section>
 
@@ -1569,6 +1569,11 @@ function addBreakdownRow(container, label, value) {
   row.className = 'estimate-row';
   row.innerHTML = '<span>' + label + '</span><strong>' + currency(value) + '</strong>';
   container.appendChild(row);
+}
+
+function quoteFormUrl(summary) {
+  return 'https://docs.google.com/forms/d/e/1FAIpQLSdAsUYCbtEHYw6juBhwc4FsMiG5EZ_LzLvNMG0MZrKiTvQmHQ/viewform?usp=pp_url&entry.1037187236=' +
+    encodeURIComponent(summary);
 }
 
 function calculateEstimate() {
@@ -1641,32 +1646,32 @@ function calculateEstimate() {
   document.getElementById('estimateNote').textContent = 'Estimated monthly rate based on the selected gross receipts tier, transactions, accounting style, account count, grants, and add-ons.';
   if (quoteButton) {
     quoteButton.textContent = 'Request a Quote';
-    var body = [
-      'I would like a quote for nonprofit accounting services.',
-      '',
-      'Gross receipts: ' + selectedText(grossReceipts),
-      'Monthly base rate: ' + currency(baseRate) + '/mo',
-      'Monthly transactions: ' + selectedText(transactionVolume) + ' (' + currency(transactions) + '/mo)',
-      'Accounting style: ' + accountingStyleLabel + ' (' + currency(style) + '/mo)',
-      'Bank/CC accounts: ' + selectedText(accountCount) + ' (' + currency(extraAccounts) + '/mo add-on)',
-      'Active grants: ' + selectedText(grantCount) + ' (' + currency(grantTracking) + '/mo)',
-      'Audit support: ' + (auditSupport.checked ? 'Yes ($150/mo)' : 'No'),
-      'Donor/member reporting: ' + (donorReporting.checked ? 'Yes ($45/mo)' : 'No'),
-      'Annual tax filing: ' + selectedText(taxFiling) + ' (' + currency(taxFilingAmount) + '/year)',
-      '',
-      'Estimated monthly add-ons: ' + currency(addOns),
-      'Estimated monthly rate: ' + currency(estimate) + '/mo',
-      'Estimated annual tax filing: ' + currency(taxFilingAmount) + '/year',
-      '',
-      'Organization name:',
-      'Contact name:',
-      'Phone:',
-      'Notes:'
-    ].join('\n');
+    var selectedAddOns = [];
 
-    quoteButton.href = 'mailto:info@notforprofitcfo.com?subject=' +
-      encodeURIComponent('Nonprofit Accounting Quote Request') +
-      '&body=' + encodeURIComponent(body);
+    if (auditSupport.checked) {
+      selectedAddOns.push('Audit');
+    }
+
+    if (donorReporting.checked) {
+      selectedAddOns.push('DonorRpt');
+    }
+
+    if (grants > 0) {
+      selectedAddOns.push('Grants:' + grants);
+    }
+
+    var summary = [
+      'Receipts:' + selectedText(grossReceipts),
+      'Tx:' + selectedText(transactionVolume),
+      'Style:' + accountingStyleLabel,
+      'Accts:' + selectedText(accountCount),
+      'AddOns:' + (selectedAddOns.length ? selectedAddOns.join('+') : 'None'),
+      'MoAdd:' + currency(addOns),
+      'MoTotal:' + currency(estimate),
+      'Tax:' + currency(taxFilingAmount) + '/yr'
+    ].join(' | ');
+
+    quoteButton.href = quoteFormUrl(summary);
   }
 }
 
@@ -1681,6 +1686,11 @@ calculatorFields.forEach(function(fieldId) {
 document.querySelectorAll('input[name="accountingStyle"]').forEach(function(field) {
   field.addEventListener('change', calculateEstimate);
 });
+
+var customQuoteButton = document.getElementById('customQuoteButton');
+if (customQuoteButton) {
+  customQuoteButton.href = quoteFormUrl('Receipts:$500,000+ | CustomQuote');
+}
 
 calculateEstimate();
 
